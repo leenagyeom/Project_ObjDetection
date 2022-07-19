@@ -4,28 +4,7 @@ from tqdm import tqdm
 import shutil
 
 def convert_bbox_coco2yolo(img_width, img_height, bbox):
-    """
-    Convert bounding box from COCO  format to YOLO format
 
-    Parameters
-    ----------
-    img_width : int
-        width of image
-    img_height : int
-        height of image
-    bbox : list[int]
-        bounding box annotation in COCO format:
-        [top left x position, top left y position, width, height]
-
-    Returns
-    -------
-    list[float]
-        bounding box annotation in YOLO format:
-        [x_center_rel, y_center_rel, width_rel, height_rel]
-    """
-
-    # YOLO bounding box format: [x_center, y_center, width, height]
-    # (float values relative to width and height of image)
     x_tl, y_tl, w, h = bbox
 
     dw = 1.0 / img_width
@@ -69,14 +48,16 @@ def convert_coco_json_to_yolo_txt(output_path, json_file):
         img_height = image["height"]
 
         anno_in_image = [anno for anno in json_data["annotations"] if anno["image_id"] == img_id]
-        anno_txt = os.path.join(output_path, img_name.split("j")[0][:-1]+'.txt')
+        anno_txt = os.path.join(output_path, img_name.split("png")[0][:-1]+'.txt')
         with open(anno_txt, "w") as f:
             for anno in anno_in_image:
-                category = anno["category_id"]
+                category = anno["category_id"]-1
                 bbox_COCO = anno["bbox"]
-                x, y, w, h = convert_bbox_coco2yolo(img_width, img_height, bbox_COCO)
-                f.write(f"{category} {x:.6f} {y:.6f} {w:.6f} {h:.6f}\n")
+                x, y, w, h = bbox_COCO
+                box = x * 640, y * 640, w * 640, h * 640
+                x, y, w, h = convert_bbox_coco2yolo(img_width, img_height, box)
+                f.write(f"{category} {x:.10f} {y:.10f} {w:.10f} {h:.10f}\n")
 
     print("Converting COCO Json to YOLO txt finished!")
 
-convert_coco_json_to_yolo_txt("./L500_labels", "./L500/coco.json")
+convert_coco_json_to_yolo_txt("../L500_labels", "../L500_padding/label.json")
