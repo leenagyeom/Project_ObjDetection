@@ -48,16 +48,16 @@ def convert_coco_json_to_yolo_txt(output_path, json_file):
         img_height = image["height"]
 
         anno_in_image = [anno for anno in json_data["annotations"] if anno["image_id"] == img_id]
-        anno_txt = os.path.join(output_path, img_name.split("png")[0][:-1]+'.txt')
+        anno_txt = os.path.join(output_path, img_name.split("jpg")[0][:-1]+'.txt')
         with open(anno_txt, "w") as f:
             for anno in anno_in_image:
                 category = anno["category_id"]-1
                 bbox_COCO = anno["bbox"]
                 x, y, w, h = bbox_COCO
-                box = x * 640, y * 640, w * 640, h * 640
+                box = x * image["width"], y * image["height"], w * image["width"], h * image["height"]
                 x, y, w, h = convert_bbox_coco2yolo(img_width, img_height, box)
                 f.write(f"{category} {x:.10f} {y:.10f} {w:.10f} {h:.10f}\n")
 
     print("Converting COCO Json to YOLO txt finished!")
 
-convert_coco_json_to_yolo_txt("../L500_labels", "../L500_padding/label.json")
+convert_coco_json_to_yolo_txt("../raw_image/L500_labels", "../raw_image/origin_azure_coco.json")
