@@ -3,6 +3,8 @@ import json
 from tqdm import tqdm
 import shutil
 
+from unicodedata import normalize
+
 def convert_bbox_coco2yolo(img_width, img_height, bbox):
 
     x_tl, y_tl, w, h = bbox
@@ -26,7 +28,6 @@ def make_folders(path="output"):
     os.makedirs(path)
     return path
 
-
 def convert_coco_json_to_yolo_txt(output_path, json_file):
 
     path = make_folders(output_path)
@@ -48,16 +49,18 @@ def convert_coco_json_to_yolo_txt(output_path, json_file):
         img_height = image["height"]
 
         anno_in_image = [anno for anno in json_data["annotations"] if anno["image_id"] == img_id]
-        anno_txt = os.path.join(output_path, img_name.split("jpg")[0][:-1]+'.txt')
-        with open(anno_txt, "w") as f:
+        anno_txt = os.path.join(output_path, img_name.replace(".jpg", "") + '.txt')
+        mac_anno_txt = normalize('NFC', anno_txt)
+
+        with open(mac_anno_txt, "w") as f:
             for anno in anno_in_image:
                 category = anno["category_id"]-1
                 bbox_COCO = anno["bbox"]
                 x, y, w, h = bbox_COCO
                 box = x * image["width"], y * image["height"], w * image["width"], h * image["height"]
                 x, y, w, h = convert_bbox_coco2yolo(img_width, img_height, box)
-                f.write(f"{category} {x:.10f} {y:.10f} {w:.10f} {h:.10f}\n")
+                f.write(f"{category} {x:.6f} {y:.6f} {w:.6f} {h:.6f}\n")
 
     print("Converting COCO Json to YOLO txt finished!")
 
-convert_coco_json_to_yolo_txt("../raw_image/L500_labels", "../raw_image/origin_azure_coco.json")
+convert_coco_json_to_yolo_txt("./raw_image/P1500_labels", "./raw_image/P1500.json")
