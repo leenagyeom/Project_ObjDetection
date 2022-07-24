@@ -25,7 +25,7 @@ def next_page(num):
 
 # 현재 페이지 주소리스트
 
-for num in range(64, 909):
+for num in range(1, 909):
 
     next_page(num)
     html = driver.page_source
@@ -41,15 +41,11 @@ for num in range(64, 909):
         image_list = soup.findAll('a', {"data-fancybox": "gallery"})
 
         for e, i in enumerate(image_list, start=1):
-            file_name = h.text.replace(' ', '_').replace('\n','')+f'_{e}'
-            if '/' in h.text:
-                file_name = file_name.replace('/', '-')
-            else :
-                file_name = file_name
             # 세번째사진까지만
             if e == 4:
                 break
             img_url = i['href']
-            urllib.request.urlretrieve('https:'+img_url, f"./car_image/{file_name}.jpg")
+            file_name = str(img_url).split('/')[-1]
+            urllib.request.urlretrieve('https:'+img_url, f"./car_image/{file_n}")
             # time.sleep(1)
         # time.sleep(1)
