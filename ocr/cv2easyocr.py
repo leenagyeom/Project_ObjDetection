@@ -6,10 +6,16 @@ import easyocr
 import numpy as np
 import random
 import cv2
+import matplotlib.pyplot as plt
+from PIL import ImageFont, ImageDraw, Image
 
 reader = easyocr.Reader(['ko', 'en'], gpu=False)
-result = reader.readtext('E:\Portfolio\ObjectDetection\dataset\\test\img_526277_1.jpg')
-img = cv2.imread('E:\Portfolio\ObjectDetection\dataset\\test\img_526277_1.jpg')
+result = reader.readtext('E:\Portfolio\ObjectDetection\dataset\\test\img_749291_2.jpg')
+img = cv2.imread('E:\Portfolio\ObjectDetection\dataset\\test\img_749291_2.jpg')
+
+img = Image.fromarray(img)
+font = ImageFont.truetype("fonts/HMKMRHD.TTF",20)
+draw = ImageDraw.Draw(img)
 
 np.random.seed(42)
 COLORS = np.random.randint(0, 255, size=(255, 3), dtype="uint8")
@@ -23,9 +29,8 @@ for i in result:
     color_idx = random.randint(0, 255)
     color = [int(c) for c in COLORS[color_idx]]
 
-    cv2.putText(img, str(i[1]), (int((x + x + w) / 2), y - 2), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
-    img = cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+    draw.rectangle(((x, y), (x + w, y + h)), outline=tuple(color), width=2)
+    draw.text((int((x + x + w) / 2), y - 2), str(i[1]), font=font, fill=tuple(color), )
 
-cv2.imshow("test", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+plt.imshow(img)
+plt.show()
